@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Tracking</title>
+    <link rel="stylesheet" href="QFstyles.css">
+    <style>
+        /* Define the CSS class for highlighting */
+        .highlighted {
+            background-color: yellow !important;
+        }
+    </style>
+</head>
+<body>
+
+    <section id="box">
+
+        <div class="topnav">
+            <a href="TO DO.html">QC TO DO LIST</a>
+        </div>
+
+    </section>
+
+    <div class="header">
+        <h1> QUICK FLIPS </h1>
+    </div>
+    
+    <div class="table-container">
+        <table id="inventoryTable">
+            <thead>
+                <tr>
+                    <th>QTY.</th>
+                    <th>ITEM</th>
+                    <th>JOB #</th>
+                    <th>LOAD TRUCK</th>
+                    <th>TECH</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Populate the table with your data -->
+                <tr>
+                    <td>10</td>
+                    <td>Televic G3 base Station</td>
+                    <td>24-9999</td>
+                    <td>3/12/2024</td>
+                    <td>AM</td>
+                </tr>
+
+                <tr>
+                    <td>1</td>
+                    <td>FSII rack</td>
+                    <td>24-9999</td>
+                    <td>3/12/2024</td>
+                    <td>MC</td>
+                </tr>
+
+                <tr>
+                    <td>5</td>
+                    <td>GLP X4</td>
+                    <td>24-8756</td>
+                    <td>3/12/2024</td>
+                    <td>CR</td>
+                </tr>
+
+                <tr>
+                    <td>10</td>
+                    <td>Televic G3 base Station</td>
+                    <td>24-9999</td>
+                    <td>3/12/2024</td>
+                    <td>AM</td>
+                </tr>
+
+                <tr>
+                    <td>1</td>
+                    <td>FSII rack</td>
+                    <td>24-9999</td>
+                    <td>3/12/2024</td>
+                    <td>MC</td>
+                </tr>
+
+                <tr>
+                    <td>5</td>
+                    <td>GLP X4</td>
+                    <td>24-8756</td>
+                    <td>3/12/2024</td>
+                    <td>CR</td>
+                </tr>
+
+                <tr>
+                    <td>10</td>
+                    <td>Televic G3 base Station</td>
+                    <td>24-9999</td>
+                    <td>3/12/2024</td>
+                    <td>AM</td>
+                </tr>
+
+                <tr>
+                    <td>1</td>
+                    <td>FSII rack</td>
+                    <td>24-9999</td>
+                    <td>3/12/2024</td>
+                    <td>MC</td>
+                </tr>
+
+                <tr>
+                    <td>5</td>
+                    <td>GLP X4</td>
+                    <td>24-8756</td>
+                    <td>3/12/2024</td>
+                    <td>CR</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <section id="Buttons">
+
+        <button id="separateBtn">Separate</button>
+        <button id="deleteBtn">Delete</button>
+
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Attach double-click event listeners to existing rows
+            document.querySelectorAll('#inventoryTable tbody tr').forEach(function(row) {
+                row.addEventListener('dblclick', function() {
+                    this.classList.toggle('highlighted');
+                    saveState(); // Save the state whenever a row is highlighted or unhighlighted
+                });
+            });
+
+            // Function to add a blank row directly below the highlighted row
+            function addBlankRow() {
+                var highlightedRow = document.querySelector('.highlighted');
+                if (!highlightedRow) return; // Exit if no row is highlighted
+
+                // Create a new row with the appropriate cells and content
+                var newRow = document.createElement('tr');
+                newRow.setAttribute('blank-row', 'true');
+                var cell = newRow.insertCell(0);
+                cell.colSpan = 5; // Assuming you have 5 columns
+                cell.innerHTML = '&nbsp;'; // For visibility
+
+                // Insert the new row directly after the highlighted row
+                highlightedRow.insertAdjacentElement('afterend', newRow);
+
+                saveState(); // Update saved state after adding a row
+            }
+
+            // Function to remove the first blank row directly under the first highlighted row
+            function removeBlankRow() {
+                var highlightedRows = document.querySelectorAll('.highlighted');
+                for (var i = 0; i < highlightedRows.length; i++) {
+                    var nextRow = highlightedRows[i].nextElementSibling;
+                    if (nextRow && nextRow.getAttribute('blank-row') === 'true') {
+                        nextRow.remove();
+                        saveState(); // Update saved state after removing a row
+                        break; // Remove only the first encountered blank row under a highlighted row
+                    }
+                }
+            }
+
+            // Save the state of highlighted and blank rows
+            function saveState() {
+                var rows = document.querySelectorAll('#inventoryTable tbody tr');
+                var state = {
+                    highlightedRows: [],
+                    blankRows: []
+                };
+
+                rows.forEach(function(row, index) {
+                    if (row.classList.contains('highlighted')) state.highlightedRows.push(index);
+                    if (row.hasAttribute('blank-row')) state.blankRows.push(index);
+                });
+
+                localStorage.setItem('tableState', JSON.stringify(state));
+            }
+
+            // Load and apply the saved state of highlighted and blank rows
+            function loadState() {
+                var state = JSON.parse(localStorage.getItem('tableState'));
+                if (!state) return;
+
+                var tbody = document.querySelector('#inventoryTable tbody');
+                state.blankRows.forEach(function(index) {
+                    var newRow = tbody.insertRow(index);
+                    var cell = newRow.insertCell(0);
+                    cell.colSpan = 5;
+                    cell.innerHTML = '&nbsp;';
+                    newRow.setAttribute('blank-row', 'true');
+                });
+
+                state.highlightedRows.forEach(function(index) {
+                    var row = tbody.rows[index];
+                    if (row) row.classList.add('highlighted');
+                });
+            }
+
+            // Attach event listeners to buttons
+            document.getElementById('separateBtn').addEventListener('click', addBlankRow);
+            document.getElementById('deleteBtn').addEventListener('click', removeBlankRow);
+
+            // Load the saved state upon initialization
+            loadState();
+        });
+    </script>
+
+
+</body>
+</html>
+
+
